@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, Heart, Zap, Utensils, Shield, LogOut, Fish, Package, Pencil, ShoppingCart } from "lucide-react"
+import { Plus, Heart, Zap, Utensils, Shield, LogOut, Fish, Package, Pencil, ShoppingCart, Users } from "lucide-react"
 import Link from "next/link"
 import {
   Dialog,
@@ -32,6 +32,7 @@ interface Villager {
   energy: number
   healthLevel: number
   lastSleep: string
+  ownerUsername: string
 }
 
 export default function Dashboard() {
@@ -180,209 +181,291 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/background-morning.jpg')" }}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="bg-white/90 rounded-lg px-4 py-3">
-            <h1 className="text-4xl font-bold text-gray-800 mb-1">My Village</h1>
-            <p className="text-gray-700">Take care and play with your villagers!</p>
-          </div>
-          <div className="flex gap-4">
-            <Link href="/activities">
-              <Button variant="outline" className="bg-white/80">
-                <Fish className="w-4 h-4 mr-2" />
-                Activities
-              </Button>
-            </Link>
-            <Link href="/collections">
-              <Button variant="outline" className="bg-white/80">
-                <Shield className="w-4 h-4 mr-2" />
-                Museum
-              </Button>
-            </Link>
-            <Link href="/inventory">
-              <Button variant="outline" className="bg-white/80">
-                <Package className="w-4 h-4 mr-2" />
-                Inventory
-              </Button>
-            </Link>
-            <Link href="/shop">
-              <Button variant="outline" className="bg-white/80">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Shop
-              </Button>
-            </Link>
-            <Link href="/villagers/create">
-              <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-                <Plus className="w-4 h-4 mr-2" />
-                New Villager
-              </Button>
-            </Link>
-            <Button variant="outline" onClick={handleLogout} className="bg-white/80">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+      <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+           style={{
+             backgroundImage: "url('/images/background-morning.jpg')",
+             backgroundSize: "cover",
+             backgroundPosition: "center",
+             backgroundRepeat: "no-repeat",
+             backgroundAttachment: "fixed"
+           }}>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8 p-6 bg-white/90 backdrop-blur-sm rounded-xl border-2 border-white shadow-lg">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  My Village
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Take care and play with your villagers!
+                </p>
+              </div>
+              <div className="ml-auto flex items-center gap-3">
+               <Link href="/villagers/create">
+                 <Button
+                     variant="outline"
+                      className="hover:shadow-md transition-all duration-200 border-2 border-gray-200"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                           Create Villager
+                 </Button>
+               </Link>
+                 <Button
+                   onClick={handleLogout}
+                   variant="outline"
+                   className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                 >
+                   <LogOut className="w-4 h-4 mr-2" />
+                     Logout
+                 </Button>
+               </div>
+            </div>
+
+            {/* Contenido principal */}
+            <div className="space-y-6">
+              {villagers.length === 0 ? (
+                <Card className="bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-8 text-center">
+                    <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-xl font-medium text-gray-700">No villagers yet</h3>
+                    <p className="mt-2 text-gray-500">Create your first villager to get started!</p>
+                    <Link href="/villagers/create" className="inline-block mt-6">
+                      <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Villager
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {/* Stats Overview */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Card className="bg-white/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Total Villagers</p>
+                            <p className="text-2xl font-bold text-gray-800">{villagers.length}</p>
+                          </div>
+                          <div className="p-3 rounded-full bg-green-100 text-green-600">
+                            <Users className="h-6 w-6" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Average Happiness</p>
+                            <p className="text-2xl font-bold text-gray-800">
+                              {Math.round(villagers.reduce((acc, v) => acc + v.happiness, 0) / villagers.length)}%
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <Heart className="h-6 w-6" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Active Today</p>
+                            <p className="text-2xl font-bold text-gray-800">
+                              {villagers.filter(v => v.energy > 30).length}/{villagers.length}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <Zap className="h-6 w-6" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Hungry Villagers</p>
+                            <p className="text-2xl font-bold text-gray-800">
+                              {villagers.filter(v => v.hunger < 30).length}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <Utensils className="h-6 w-6" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Villagers Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {villagers.map((villager) => (
+                      <Card key={villager.villagerId} className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all">
+                        <div className="relative">
+                          <div className="h-40 bg-gradient-to-r from-blue-50 to-green-50 flex items-center justify-center">
+                            <span className="text-8xl">{getAnimalEmoji(villager.animalType)}</span>
+                            <div className="absolute top-3 right-3">
+                              <Badge variant="secondary" className="flex items-center gap-1">
+                                {getPersonalityEmoji(villager.personality)}
+                                <span className="capitalize">{villager.personality.toLowerCase()}</span>
+                              </Badge>
+                            </div>
+                          </div>
+                          <CardHeader>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <CardTitle className="text-2xl font-bold">{villager.villagerName}</CardTitle>
+                                <CardDescription className="capitalize">
+                                    {villager.animalType.toLowerCase()} • Owner: {villager.ownerUsername}
+                                </CardDescription>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingVillager({ id: villager.villagerId, name: villager.villagerName })
+                                  setNewName(villager.villagerName)
+                                }}
+                                className="text-gray-400 hover:text-gray-600"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="text-gray-600">Happiness</span>
+                                <span className={`font-medium ${getStatusColor(villager.happiness)}`}>
+                                  {villager.happiness}%
+                                </span>
+                              </div>
+                              <Progress value={villager.happiness} className="h-2" />
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="text-gray-600">Hunger</span>
+                                <span className={`font-medium ${getStatusColor(villager.hunger)}`}>
+                                  {villager.hunger}%
+                                </span>
+                              </div>
+                              <Progress value={villager.hunger} className="h-2" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="text-gray-600">Energy</span>
+                                <span className={`font-medium ${getStatusColor(villager.energy)}`}>
+                                  {villager.energy}%
+                                </span>
+                              </div>
+                              <Progress value={villager.energy} className="h-2" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="text-gray-600">Health</span>
+                                <span className={`font-medium ${getStatusColor(villager.healthLevel)}`}>
+                                  {villager.healthLevel}%
+                                </span>
+                              </div>
+                              <Progress
+                                value={villager.healthLevel}
+                                className="h-2"
+                              />
+                            </div>
+                            <div className="pt-2">
+                               <Link href={`/villagers/${villager.villagerId}`}>
+                                  <Button
+                                      variant="default"
+                                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                                  >
+                                    <Heart className="w-4 h-4 mr-2" />
+                                        Interact
+                                  </Button>
+                               </Link>
+                            </div>
+                          </CardContent>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  {/* Quick Actions */}
+                   <div className="mt-8">
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Link href="/activities">
+                        <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2">
+                          <Zap className="h-6 w-6 text-yellow-500" />
+                          <span>Activities</span>
+                        </Button>
+                      </Link>
+                      <Link href="/collections">
+                        <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2">
+                          <Package className="h-6 w-6 text-blue-500" />
+                          <span>Museum</span>
+                        </Button>
+                      </Link>
+                      <Link href="/inventory">
+                        <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2">
+                          <Package className="h-6 w-6 text-purple-500" />
+                          <span>Inventory</span>
+                        </Button>
+                      </Link>
+                      <Link href="/shop">
+                        <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2">
+                          <ShoppingCart className="h-6 w-6 text-green-500" />
+                          <span>Shop</span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Villagers Grid */}
-        {villagers.length === 0 ? (
-          <Card className="text-center py-12 bg-white/80 backdrop-blur-sm">
-            <CardContent>
-              <div className="text-6xl mb-4">🏠</div>
-              <h3 className="text-xl font-semibold mb-2">Your village is empty!</h3>
-              <p className="text-gray-600 mb-4">Create your first villager to start the adventure</p>
-              <Link href="/villagers/create">
-                <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Villager
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {villagers.map((villager) => (
-              <Card
-                key={villager.villagerId}
-                className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <span className="text-2xl">{getAnimalEmoji(villager.animalType)}</span>
-                      {villager.villagerName}
-                      <button
-                        onClick={() => {
-                          setEditingVillager({ id: villager.villagerId, name: villager.villagerName })
-                          setNewName(villager.villagerName)
-                        }}
-                        className="text-gray-400 hover:text-gray-600 ml-2"
-                        title="Rename villager"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    </CardTitle>
-                    <div className="flex items-center gap-1">
-                      <span className="text-lg">{getPersonalityEmoji(villager.personality)}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {villager.personality.toLowerCase()}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardDescription>
-                    {villager.animalType.toLowerCase()} • Friendship level: {villager.friendshipLevel}
-                    {villager.ownerUsername && (
-                      <span className="block text-xs text-gray-500 mt-1">
-                        Owner: {villager.ownerUsername}
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Stats */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-red-500" />
-                        <span className="text-sm">Happiness</span>
-                      </div>
-                      <span className={`text-sm font-medium ${getStatusColor(villager.happiness)}`}>
-                        {villager.happiness}%
-                      </span>
-                    </div>
-                    <Progress value={villager.happiness} className="h-2" />
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-yellow-500" />
-                        <span className="text-sm">Energy</span>
-                      </div>
-                      <span className={`text-sm font-medium ${getStatusColor(villager.energy)}`}>
-                        {villager.energy}%
-                      </span>
-                    </div>
-                    <Progress value={villager.energy} className="h-2" />
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Utensils className="w-4 h-4 text-orange-500" />
-                        <span className="text-sm">Hunger</span>
-                      </div>
-                      <span className={`text-sm font-medium ${getStatusColor(100 - villager.hunger)}`}>
-                        {villager.hunger > 70 ? "Hungry" : villager.hunger > 30 ? "Satisfied" : "Full"}
-                      </span>
-                    </div>
-                    <Progress value={Math.max(0, 100 - villager.hunger)} className="h-2" />
-
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm">Health</span>
-                      </div>
-                      <span className={`text-sm font-medium ${getStatusColor(villager.healthLevel)}`}>
-                        {villager.healthLevel}%
-                      </span>
-                    </div>
-                    <Progress value={villager.healthLevel} className="h-2" />
-                  </div>
-
-                  <Link href={`/villagers/${villager.villagerId}`}>
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 mt-6">
-                      Interact
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Diálogo para renombrar aldeano */}
-      <Dialog open={!!editingVillager} onOpenChange={(open) => !open && setEditingVillager(null)}>
-        <DialogContent className="sm:max-w-[425px] bg-white">
-          <DialogHeader>
-            <DialogTitle>Rename Villager</DialogTitle>
-            <DialogDescription>
-              Enter a new name for your villager.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                className="col-span-3"
-                onKeyDown={(e) => e.key === 'Enter' && handleRenameVillager()}
-              />
+        {/* Diálogo para renombrar aldeano */}
+        <Dialog open={!!editingVillager} onOpenChange={(open) => !open && setEditingVillager(null)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Rename Villager</DialogTitle>
+              <DialogDescription>
+                Enter a new name for your villager.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="col-span-3"
+                  onKeyDown={(e) => e.key === 'Enter' && handleRenameVillager()}
+                />
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEditingVillager(null)}
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleRenameVillager}
-              disabled={!newName.trim() || isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
+            <DialogFooter>
+              <Button
+                type="submit"
+                onClick={handleRenameVillager}
+                disabled={isSaving || !newName.trim()}
+              >
+                {isSaving ? 'Saving...' : 'Save changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }

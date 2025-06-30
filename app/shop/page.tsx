@@ -29,6 +29,7 @@ interface InventoryItem {
   rarity: string
   value: number
   quantity: number
+  imageUrl?: string
 }
 
 export default function Shop() {
@@ -191,15 +192,24 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
 
       if (response.ok) {
         const data = await response.json()
-        const processedItems = (data.items || []).map((item: any) => ({
-          id: item.id,
-          itemId: item.itemId,
-          itemName: item.itemName,
-          itemType: item.itemType,
-          rarity: item.rarity,
-          value: item.value,
-          quantity: item.quantity
-        }))
+        const processedItems = (data.items || []).map((item: any) => {
+
+          const imageName = item.itemName.toLowerCase().replace(/\s+/g, '-');
+          const imagePath = item.itemType === 'FISH'
+            ? `/images/activities/fish/${imageName}.jpeg`
+            : `/images/activities/bugs/${imageName}.jpeg`;
+
+          return {
+            id: item.id,
+            itemId: item.itemId,
+            itemName: item.itemName,
+            itemType: item.itemType,
+            rarity: item.rarity,
+            value: item.value,
+            quantity: item.quantity,
+            imageUrl: imagePath,
+          }
+        })
         setInventory(processedItems)
       }
     } catch (error) {
@@ -530,7 +540,40 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
                 {filteredInventory.map((item) => (
                   <Card key={item.id} className="overflow-hidden bg-white/90 hover:shadow-lg transition-shadow">
                     <div className="h-32 bg-gray-100 flex items-center justify-center">
-                      {item.itemType === 'FISH' ? (
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.itemName}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            // Si la imagen no se carga, mostrar el ícono por defecto
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.style.display = 'none';
+                            const icon = item.itemType === 'FISH' ?
+                              <Fish className="h-12 w-12 text-blue-500" /> :
+                              <Bug className="h-12 w-12 text-green-600" />;
+                            // Crear un contenedor para el ícono si no existe
+                            if (!target.nextElementSibling) {
+                              const iconContainer = document.createElement('div');
+                              iconContainer.className = 'flex items-center justify-center h-full w-full';
+                              target.parentNode?.insertBefore(iconContainer, target.nextSibling);
+                            }
+                            // Renderizar el ícono en el contenedor
+                            if (target.nextElementSibling) {
+                              const iconContainer = target.nextElementSibling as HTMLElement;
+                              iconContainer.innerHTML = '';
+                              const iconSvg = document.createElement('span');
+                              iconSvg.className = item.itemType === 'FISH' ?
+                                'h-12 w-12 text-blue-500' : 'h-12 w-12 text-green-600';
+                              iconSvg.innerHTML = item.itemType === 'FISH' ?
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fish"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 0 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5.5 4-.5 5 1 1 3.5 0 5 0 1.5 0 4 1 5 0s.5-3.5-1-5"/></svg>' :
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bug"><rect width="8" height="14" x="8" y="6" rx="4"/><path d="m19 7-3 2"/><path d="m5 7 3 2"/><path d="m19 19-3-2"/><path d="m5 19 3-2"/><path d="M20 13h-4"/><path d="M4 13h4"/><path d="m10 13 4 0"/></svg>';
+                              iconContainer.appendChild(iconSvg);
+                            }
+                          }}
+                        />
+                      ) : item.itemType === 'FISH' ? (
                         <Fish className="h-12 w-12 text-blue-500" />
                       ) : (
                         <Bug className="h-12 w-12 text-green-600" />

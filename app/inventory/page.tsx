@@ -210,13 +210,13 @@ export default function Inventory() {
     const totalItems = filtered.reduce((sum, item) => sum + item.quantity, 0)
     const totalValue = filtered.reduce((sum, item) => sum + item.value * item.quantity, 0)
     const uniqueSpecies = new Set(filtered.map((item) => item.itemId)).size
-    const rareItems = filtered.filter((item) => item.rarity === "rare").length
+    const legendaryItems = filtered.filter((item) => item.rarity.toLowerCase() === "legendary").length
 
     setStats({
       totalItems,
       totalValue,
       uniqueSpecies,
-      rareItems,
+      rareItems: legendaryItems,
     })
 
     setFilteredInventory(filtered)
@@ -425,7 +425,7 @@ export default function Inventory() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2 text-gray-500">
                 <Award className="h-5 w-5 text-purple-500" />
-                <CardDescription>Rare Items</CardDescription>
+                <CardDescription>Legendary Items</CardDescription>
               </div>
               <CardTitle className="text-3xl flex items-center gap-2">
                 {stats.rareItems}
