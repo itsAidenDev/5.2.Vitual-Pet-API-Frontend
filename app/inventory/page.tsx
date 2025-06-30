@@ -81,23 +81,29 @@ export default function Inventory() {
       const inventoryItems = itemsResponse.ok ? await itemsResponse.json() : { items: [] }
       const furnitureItems = furnitureResponse.ok ? await furnitureResponse.json() : []
 
-      const processedItems = (inventoryItems.items || []).map((item: any) => ({
-        id: item.id,
-        itemId: item.itemId,
-        itemName: item.itemName,
-        itemType: item.itemType,
-        rarity: item.rarity,
-        value: item.value,
-        quantity: item.quantity,
-        imageUrl: item.itemType === 'FISH'
-          ? '/images/fish-icon.png'
-          : '/images/bug-icon.png',
-        habitat: item.habitat || '',
-        location: item.location || '',
-        caughtBy: item.caughtBy || '',
-        itemDescription: item.itemDescription || '',
-        caughtAt: item.caughtAt || new Date().toISOString()
-      }))
+      const processedItems = (inventoryItems.items || []).map((item: any) => {
+        // Convertir el nombre del ítem a minúsculas y reemplazar espacios con guiones
+        const imageName = item.itemName.toLowerCase().replace(/\s+/g, '-');
+        const imagePath = item.itemType === 'FISH'
+          ? `/images/activities/fish/${imageName}.jpeg`
+          : `/images/activities/bugs/${imageName}.jpeg`;
+
+        return {
+          id: item.id,
+          itemId: item.itemId,
+          itemName: item.itemName,
+          itemType: item.itemType,
+          rarity: item.rarity,
+          value: item.value,
+          quantity: item.quantity,
+          imageUrl: imagePath,
+          habitat: item.habitat || '',
+          location: item.location || '',
+          caughtBy: item.caughtBy || '',
+          itemDescription: item.itemDescription || '',
+          caughtAt: item.caughtAt || new Date().toISOString()
+        };
+      })
 
       const processedFurniture = furnitureItems.map((item: any) => ({
         id: `furniture-${item.id}`,
@@ -121,7 +127,7 @@ export default function Inventory() {
       console.error("Error fetching inventory:", error)
       toast({
         title: "Error",
-        description: "No se pudo cargar el inventario",
+        description: "Inventory could not be loaded",
         variant: "destructive",
       })
     } finally {
@@ -151,7 +157,7 @@ export default function Inventory() {
       console.error("Error fetching user balance:", error)
       toast({
         title: "Error",
-        description: "No se pudo cargar el saldo del usuario",
+        description: "The user's balance could not be charged.",
         variant: "destructive",
       })
     }
@@ -334,34 +340,40 @@ export default function Inventory() {
     >
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <Link href="/dashboard">
-                <Button variant="ghost" size="icon" className="hover:bg-green-100">
-                  <ArrowLeft className="h-5 w-5 text-green-700" />
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                <Package className="h-8 w-8 text-green-600" />
-                My Collection
-              </h1>
-            </div>
-            <p className="text-gray-600 ml-12 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1">
-                <User className="h-4 w-4" /> {userBalance} Bells
-              </span>
-              <span className="mx-2">•</span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-4 w-4" /> {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </span>
+        <div className="flex flex-col gap-4 mb-8 p-6 bg-white/90 backdrop-blur-sm rounded-xl border-2 border-white shadow-lg relative">
+          {/* Date and Balance */}
+          <div className="absolute top-6 right-6 flex items-center gap-6">
+            <p className="text-gray-500 text-sm flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
+              <Calendar className="h-4 w-4" />
+              {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
+
+            <div className="flex items-center gap-4 bg-gradient-to-r from-green-50 to-blue-50 px-4 py-2 rounded-full shadow-inner">
+              <Coins className="h-6 w-6 text-yellow-500" />
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Your Balance</p>
+                <p className="text-xl font-bold text-yellow-600">{userBalance} Bells</p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-4 bg-gradient-to-r from-green-50 to-blue-50 px-6 py-3 rounded-full shadow-inner mt-4 md:mt-0">
-            <Coins className="h-8 w-8 text-yellow-500" />
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Your Balance</p>
-              <p className="text-2xl font-bold text-yellow-600">{userBalance} Bells</p>
+          <div className="flex items-center gap-4 w-full pr-80">
+            <Link href="/dashboard">
+              <Button
+                variant="outline"
+                size="icon"
+                className="hover:shadow-md transition-all duration-200 border-2 border-gray-200"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent inline-block">
+                My Inventory
+              </h1>
+              <p className="text-gray-600 mt-1 flex items-center gap-2">
+                <Package className="w-4 h-4 text-blue-500" />
+                Manage your collected items and equipment
+              </p>
             </div>
           </div>
         </div>
