@@ -379,16 +379,16 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="bg-white/90 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
               <Link href="/dashboard">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-gray-100">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
               <h1 className="text-3xl font-bold text-gray-800">Nook's Cranny</h1>
             </div>
-            <p className="text-gray-600 ml-12">Buy and sell items here!</p>
+            <p className="text-gray-700 ml-12 mt-1">Buy and sell items here!</p>
           </div>
           <div className="flex items-center gap-4 bg-white/80 px-4 py-2 rounded-lg shadow">
             <Coins className="h-6 w-6 text-yellow-500" />
