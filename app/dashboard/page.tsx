@@ -7,8 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, Heart, Zap, Utensils, Shield, LogOut, Fish, Package } from "lucide-react"
+import { Plus, Heart, Zap, Utensils, Shield, LogOut, Fish, Package, Pencil, ShoppingCart } from "lucide-react"
 import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface Villager {
   villagerId: number
@@ -26,6 +37,9 @@ interface Villager {
 export default function Dashboard() {
   const [villagers, setVillagers] = useState<Villager[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [editingVillager, setEditingVillager] = useState<{id: number, name: string} | null>(null)
+  const [newName, setNewName] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -105,6 +119,55 @@ export default function Dashboard() {
     return emojis[animalType] || "🐾"
   }
 
+  const handleRenameVillager = async () => {
+    if (!editingVillager || !newName.trim()) return
+
+    setIsSaving(true)
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/villagers/${editingVillager.id}/name`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: newName }),
+        }
+      )
+
+      if (response.ok) {
+        // Actualizar la lista de aldeanos
+        setVillagers(villagers.map(v =>
+          v.villagerId === editingVillager.id
+            ? { ...v, villagerName: newName }
+            : v
+        ))
+        toast({
+          title: "Success",
+          description: "Villager renamed successfully!",
+        })
+        setEditingVillager(null)
+      } else {
+        const error = await response.text()
+        toast({
+          title: "Error",
+          description: error || "Failed to rename villager",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Error",
+        description: "Could not connect to the server",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/background-morning.jpg')" }}>
@@ -142,6 +205,12 @@ export default function Dashboard() {
               <Button variant="outline" className="bg-white/80">
                 <Package className="w-4 h-4 mr-2" />
                 Inventory
+              </Button>
+            </Link>
+            <Link href="/shop">
+              <Button variant="outline" className="bg-white/80">
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Shop
               </Button>
             </Link>
             <Link href="/villagers/create">
@@ -184,6 +253,16 @@ export default function Dashboard() {
                     <CardTitle className="flex items-center gap-2">
                       <span className="text-2xl">{getAnimalEmoji(villager.animalType)}</span>
                       {villager.villagerName}
+                      <button
+                        onClick={() => {
+                          setEditingVillager({ id: villager.villagerId, name: villager.villagerName })
+                          setNewName(villager.villagerName)
+                        }}
+                        className="text-gray-400 hover:text-gray-600 ml-2"
+                        title="Rename villager"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
                     </CardTitle>
                     <div className="flex items-center gap-1">
                       <span className="text-lg">{getPersonalityEmoji(villager.personality)}</span>
@@ -254,6 +333,49 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Diálogo para renombrar aldeano */}
+      <Dialog open={!!editingVillager} onOpenChange={(open) => !open && setEditingVillager(null)}>
+        <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogHeader>
+            <DialogTitle>Rename Villager</DialogTitle>
+            <DialogDescription>
+              Enter a new name for your villager.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="col-span-3"
+                onKeyDown={(e) => e.key === 'Enter' && handleRenameVillager()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditingVillager(null)}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleRenameVillager}
+              disabled={!newName.trim() || isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
