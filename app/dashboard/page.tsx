@@ -198,7 +198,7 @@ export default function Dashboard() {
             <Link href="/collections">
               <Button variant="outline" className="bg-white/80">
                 <Shield className="w-4 h-4 mr-2" />
-                Collections
+                Museum
               </Button>
             </Link>
             <Link href="/inventory">

@@ -133,7 +133,7 @@ export default function Inventory() {
     try {
       const token = localStorage.getItem("token")
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/user/balance`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/auth/me`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -143,10 +143,17 @@ export default function Inventory() {
 
       if (response.ok) {
         const data = await response.json()
-        setUserBalance(data.balance)
+        setUserBalance(data.points || 0)
+      } else {
+        console.error("Error fetching user data:", await response.text())
       }
     } catch (error) {
       console.error("Error fetching user balance:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo cargar el saldo del usuario",
+        variant: "destructive",
+      })
     }
   }
 
@@ -231,7 +238,7 @@ export default function Inventory() {
         )
       } else {
         response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/inventory/items/${itemId}`,
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/inventory/item/${itemId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
@@ -242,8 +249,8 @@ export default function Inventory() {
       if (response.ok) {
         const message = await response.text()
         toast({
-          title: "¡Vendido!",
-          description: `Has vendido ${item.itemName} por ${item.value} Bells`,
+          title: "Sold!",
+          description: `You've sold ${item.itemName} for ${item.value} Bells`,
         })
         fetchInventory()
         fetchUserBalance()
@@ -251,14 +258,14 @@ export default function Inventory() {
         const error = await response.text()
         toast({
           title: "Error",
-          description: error || "No se pudo vender el artículo",
+          description: error || "The item could not be sold",
           variant: "destructive",
         })
       }
     } catch (error) {
       toast({
-        title: "Error de conexión",
-        description: "No se pudo conectar al servidor",
+        title: "Connection Error",
+        description: "Could not connect to the server",
         variant: "destructive",
       })
     } finally {
