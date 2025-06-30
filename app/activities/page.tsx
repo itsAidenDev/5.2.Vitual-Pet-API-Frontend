@@ -251,9 +251,9 @@ export default function Activities() {
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Activity Center</h1>
-              <p className="text-gray-600">Explore and catch creatures with your villagers!</p>
+            <div className="bg-white/90 rounded-lg px-4 py-3">
+              <h1 className="text-3xl font-bold text-gray-800 mb-1">Activity Center</h1>
+              <p className="text-gray-700">Explore and catch creatures with your villagers!</p>
             </div>
           </div>
 

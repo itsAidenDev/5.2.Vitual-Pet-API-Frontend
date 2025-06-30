@@ -184,9 +184,9 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">My Village</h1>
-            <p className="text-gray-600">Take care and play with your villagers!</p>
+          <div className="bg-white/90 rounded-lg px-4 py-3">
+            <h1 className="text-4xl font-bold text-gray-800 mb-1">My Village</h1>
+            <p className="text-gray-700">Take care and play with your villagers!</p>
           </div>
           <div className="flex gap-4">
             <Link href="/activities">
