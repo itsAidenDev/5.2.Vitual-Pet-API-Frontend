@@ -314,6 +314,8 @@ export default function Dashboard() {
                         {villager.hunger > 70 ? "Hungry" : villager.hunger > 30 ? "Satisfied" : "Full"}
                       </span>
                     </div>
+                    <Progress value={Math.max(0, 100 - villager.hunger)} className="h-2" />
+
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
