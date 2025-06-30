@@ -273,6 +273,11 @@ export default function Dashboard() {
                   </div>
                   <CardDescription>
                     {villager.animalType.toLowerCase()} • Friendship level: {villager.friendshipLevel}
+                    {villager.ownerUsername && (
+                      <span className="block text-xs text-gray-500 mt-1">
+                        Owner: {villager.ownerUsername}
+                      </span>
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

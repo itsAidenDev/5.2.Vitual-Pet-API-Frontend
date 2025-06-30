@@ -62,14 +62,16 @@ export default function Shop() {
       },
     ];
 
-const [furniture, setFurniture] = useState<FurnitureItem[]>(DEFAULT_FURNITURE);
+const [furniture, setFurniture] = useState<FurnitureItem[]>([])
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [selectedTab, setSelectedTab] = useState("buy")
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSelling, setIsSelling] = useState(false)
   const [isBuying, setIsBuying] = useState(false)
-  const [userBalance, setUserBalance] = useState(0)
+  const [userBalance, setUserBalance] = useState(1000)
+  const [villagers, setVillagers] = useState<Array<{id: number, name: string}>>([]);
+  const [selectedVillagerId, setSelectedVillagerId] = useState<number | null>(null);
   const { toast } = useToast()
   const router = useRouter()
 
@@ -82,26 +84,99 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>(DEFAULT_FURNITURE);
     fetchShopData()
     fetchInventory()
     fetchUserBalance()
+    fetchVillagers()
   }, [])
+
+  const fetchVillagers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/villagers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data)) {
+        // Map the backend's VillagerDTO to the expected frontend format
+        const formattedVillagers = data.map(villager => ({
+          id: villager.villagerId,  // Match the backend's field name
+          name: villager.villagerName  // Match the backend's field name
+        }));
+
+        setVillagers(formattedVillagers);
+        if (formattedVillagers.length > 0) {
+          setSelectedVillagerId(formattedVillagers[0].id);
+        } else {
+          toast({
+            title: "No villagers found",
+            description: "Please create a villager first!",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.warn("Unexpected data format:", data);
+        toast({
+          title: "Error",
+          description: "Unexpected data format received from server",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching villagers:", error);
+      toast({
+        title: "Error",
+        description: "Could not load villagers. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchShopData = async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/shop/furniture`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/shop/furniture`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        // Combina los muebles por defecto con los del servidor
-        setFurniture([...DEFAULT_FURNITURE, ...data]);
+        // Usar SOLO los muebles del backend
+        setFurniture(data);
       } else {
-        // Si hay un error, usa los muebles por defecto
-        console.warn("Using default furniture due to error:", await response.text());
+        const errorText = await response.text();
+        console.error("Error al obtener muebles:", errorText);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los muebles de la tienda",
+          variant: "destructive",
+        });
+        setFurniture([]); // Establecer un array vacío en lugar de usar DEFAULT_FURNITURE
       }
     } catch (error) {
-      console.error("Connection error. Using default furniture:", error);
+      console.error("Error de conexión:", error);
+      toast({
+        title: "Error de conexión",
+        description: "No se pudo conectar al servidor",
+        variant: "destructive",
+      });
+      setFurniture([]); // Establecer un array vacío en lugar de usar DEFAULT_FURNITURE
     } finally {
       setIsLoading(false);
     }
@@ -168,7 +243,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>(DEFAULT_FURNITURE);
     } catch (error) {
       console.error("Error fetching user balance:", error);
       toast({
-        title: "Error de conexión",
+        title: "Connection error",
         description: "No se pudo conectar al servidor",
         variant: "destructive",
       });
@@ -176,48 +251,63 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>(DEFAULT_FURNITURE);
   };
 
   const handlePurchase = async (furnitureId: number) => {
-    if (isBuying) return
+    if (isBuying || !selectedVillagerId) {
+      toast({
+        title: "Error",
+        description: "Please select a villager before buying furniture",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setIsBuying(true)
-    try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/shop/purchase`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          furnitureId,
-          villagerId: 1, // TODO: Obtener el ID del aldeano seleccionado
-        }),
-      })
+    setIsBuying(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/shop/purchase`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              furnitureId: furnitureId,
+              villagerId: selectedVillagerId,
+            }),
+            credentials: "include",
+          }
+        );
 
       if (response.ok) {
         toast({
-          title: "Success",
-          description: "Item purchased successfully!",
-        })
-        fetchInventory()
-        fetchUserBalance()
+          title: "Success!",
+          description: "Furniture successfully purchased!",
+        });
+        // Actualizar el inventario y el saldo
+        fetchInventory();
+        fetchUserBalance();
       } else {
-        const error = await response.text()
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error en la compra:", errorData);
         toast({
           title: "Error",
-          description: error || "Failed to purchase item",
+          description:
+            errorData.message || "The furniture could not be purchased",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
+      console.error("Connection error:", error);
       toast({
-        title: "Connection Error",
-        description: "Could not connect to the server",
+        title: "Connection error",
+        description: "No se pudo conectar al servidor",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsBuying(false)
+      setIsBuying(false);
     }
-  }
+  };
 
   const handleSell = async (itemId: string) => {
       if (isSelling) return
@@ -368,13 +458,42 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>(DEFAULT_FURNITURE);
                       </div>
                     </CardHeader>
                     <CardFooter>
-                      <Button
-                        className="w-full"
-                        onClick={() => handlePurchase(item.id)}
-                        disabled={isBuying || userBalance < item.price}
-                      >
-                        {isBuying ? "Processing..." : "Buy Now"}
-                      </Button>
+                      {villagers.length > 0 ? (
+                        <div className="w-full space-y-4">
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Select Villager:</label>
+                            <select
+                              value={selectedVillagerId || ""}
+                              onChange={(e) => setSelectedVillagerId(Number(e.target.value))}
+                              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                              {villagers.map((villager) => (
+                                <option key={villager.id} value={villager.id}>
+                                  {villager.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button
+                            className="w-full"
+                            onClick={() => handlePurchase(item.id)}
+                            disabled={isBuying || userBalance < item.price || !selectedVillagerId}
+                          >
+                            {isBuying ? "Processing..." : `Buy for ${item.price} Bells`}
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="w-full text-center p-4 bg-yellow-50 rounded-md">
+                          <p className="text-yellow-800">No villagers available. Create a villager first!</p>
+                          <Button
+                            variant="link"
+                            className="mt-2 text-green-600"
+                            onClick={() => router.push('/dashboard')}
+                          >
+                            Go to Dashboard
+                          </Button>
+                        </div>
+                      )}
                     </CardFooter>
                   </Card>
                 ))}

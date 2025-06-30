@@ -32,6 +32,7 @@ interface Villager {
   energy: number
   healthLevel: number
   lastSleep: string
+  ownerUsername?: string
 }
 
 interface ActionResult {
@@ -271,8 +272,24 @@ export default function VillagerDetail() {
 
   const healthStatus = getHealthStatus(villager.healthLevel)
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 via-blue-50 to-purple-100">
+   return (
+     <div
+       className="min-h-screen bg-cover bg-center bg-no-repeat"
+       style={{
+         backgroundImage: "url('/images/villager-interaction-background.jpg')",
+         backgroundSize: "cover",
+         backgroundPosition: "center"
+       }}
+     >
+       <div className="container mx-auto px-4 py-8">
+         <Button
+           variant="ghost"
+           className="mb-6 bg-white/80 hover:bg-white"
+           onClick={() => router.back()}
+         >
+           <ArrowLeft className="w-4 h-4 mr-2" />
+           Back to Dashboard
+         </Button>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -283,19 +300,21 @@ export default function VillagerDetail() {
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">{getAnimalEmoji(villager.animalType)}</span>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">{villager.villagerName}</h1>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{getPersonalityEmoji(villager.personality)}</span>
-                    <Badge variant="secondary">{villager.personality.toLowerCase()}</Badge>
-                    <Badge variant="outline">{villager.animalType.toLowerCase()}</Badge>
-                    {villager.healthLevel < 30 && (
-                      <Badge variant="destructive" className="animate-pulse">
-                        🏥 Sick
-                      </Badge>
-                    )}
+              <div className="flex items-center">
+                <div className="bg-white/90 rounded-lg px-3 py-2 flex items-center gap-3">
+                  <span className="text-4xl">{getAnimalEmoji(villager.animalType)}</span>
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-800">{villager.villagerName}</h1>
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg">{getPersonalityEmoji(villager.personality)}</span>
+                        <Badge variant="secondary">{villager.personality.toLowerCase()}</Badge>
+                        <Badge variant="outline">{villager.animalType.toLowerCase()}</Badge>
+                        {villager.healthLevel < 30 && (
+                             <Badge variant="destructive" className="animate-pulse">
+                            🏥 Sick
+                        </Badge>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -304,7 +323,7 @@ export default function VillagerDetail() {
             {/* Delete Button */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="bg-red-500 hover:bg-red-600">
+                <Button variant="destructive" className="bg-red-500 hover:bg-red-600 h-10 px-4 py-2 text-base">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Release
                 </Button>
@@ -481,6 +500,7 @@ export default function VillagerDetail() {
             </Card>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
