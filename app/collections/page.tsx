@@ -218,26 +218,26 @@ export default function Collections() {
       <div className="bg-black/30 min-h-screen">
         <div className="container mx-auto px-4 py-8">
            {/* Header */}
-                  <div className="flex items-center gap-4 mb-8">
-                    <Link href="/dashboard">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="bg-white/80 hover:bg-white hover:shadow-md transition-all duration-200 border-2 border-blue-200"
-                      >
-                        <ArrowLeft className="w-5 h-5 text-blue-600" />
-                      </Button>
-                    </Link>
-                    <div>
-                      <h1 className="text-4xl font-bold text-white drop-shadow-md">
-                        Museum Collection
-                      </h1>
-                      <p className="text-gray-200 mt-1 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-yellow-300" />
-                        A record of all unique creatures you've discovered
-                      </p>
-                    </div>
-                  </div>
+           <div className="flex items-center gap-4 mb-8 p-6 bg-white/90 backdrop-blur-sm rounded-xl border-2 border-white shadow-lg">
+             <Link href="/dashboard">
+               <Button
+                 variant="outline"
+                 size="icon"
+                 className="hover:shadow-md transition-all duration-200 border-2 border-gray-200"
+               >
+                 <ArrowLeft className="w-5 h-5" />
+               </Button>
+             </Link>
+             <div>
+               <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                 Museum Collection
+               </h1>
+               <p className="text-gray-600 mt-1 flex items-center gap-2">
+                 <Sparkles className="w-4 h-4 text-yellow-500" />
+                 A record of all unique creatures you've discovered
+               </p>
+             </div>
+           </div>
 
           {/* Villager Selection */}
            <Card className="mb-8 bg-white/90 backdrop-blur-sm border-2 border-white/20 shadow-lg">

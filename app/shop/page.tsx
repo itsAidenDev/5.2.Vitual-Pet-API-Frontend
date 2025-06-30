@@ -378,23 +378,37 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
     <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/tienda-virtual-pet.jpg')" }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="bg-white/90 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Link href="/dashboard">
-                <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-800">Nook's Cranny</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 p-6 bg-white/90 backdrop-blur-sm rounded-xl border-2 border-white shadow-lg">
+          <div className="flex items-center gap-4 w-full">
+            <Link href="/dashboard">
+              <Button
+                variant="outline"
+                size="icon"
+                className="hover:shadow-md transition-all duration-200 border-2 border-gray-200"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent inline-block">
+                Nook's Cranny
+              </h1>
+              <p className="text-gray-600 mt-1 flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-green-500" />
+                Buy and sell items here!
+              </p>
             </div>
-            <p className="text-gray-700 ml-12 mt-1">Buy and sell items here!</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white/80 px-4 py-2 rounded-lg shadow">
-            <Coins className="h-6 w-6 text-yellow-500" />
-            <span className="text-lg font-semibold">{userBalance} Bells</span>
+
+            {/* Bells Display */}
+            <div className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-lg shadow-md border border-gray-200 ml-auto">
+              <Coins className="h-6 w-6 text-yellow-500" />
+              <span className="text-lg font-semibold text-gray-800 whitespace-nowrap">{userBalance} Bells</span>
+            </div>
           </div>
         </div>
+
+
+
 
         {/* Tabs */}
         <Tabs defaultValue="buy" className="w-full" onValueChange={setSelectedTab}>

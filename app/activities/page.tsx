@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Fish, BugIcon, MapPin } from "lucide-react"
+import { ArrowLeft, Fish, BugIcon, MapPin, Zap } from "lucide-react"
 import Link from "next/link"
 
 interface Villager {
@@ -245,18 +245,26 @@ export default function Activities() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-8 p-6 bg-white/90 backdrop-blur-sm rounded-xl border-2 border-white shadow-lg">
             <Link href="/dashboard">
-              <Button variant="outline" size="icon" className="bg-white/80">
-                <ArrowLeft className="w-4 h-4" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="hover:shadow-md transition-all duration-200 border-2 border-gray-200"
+              >
+                <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
-            <div className="bg-white/90 rounded-lg px-4 py-3">
-              <h1 className="text-3xl font-bold text-gray-800 mb-1">Activity Center</h1>
-              <p className="text-gray-700">Explore and catch creatures with your villagers!</p>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Activity Center
+              </h1>
+              <p className="text-gray-600 mt-1 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-yellow-500" />
+                Explore and interact with the world around you
+              </p>
             </div>
           </div>
-
           {/* Selection Controls */}
           <Card className="mb-8 bg-white/80 backdrop-blur-sm">
             <CardHeader>
