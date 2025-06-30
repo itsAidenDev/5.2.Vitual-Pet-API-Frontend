@@ -161,19 +161,19 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
         setFurniture(data);
       } else {
         const errorText = await response.text();
-        console.error("Error al obtener muebles:", errorText);
+        console.error("Error fetching furniture data:", errorText);
         toast({
           title: "Error",
-          description: "No se pudieron cargar los muebles de la tienda",
+          description: "The store furniture could not be loaded.",
           variant: "destructive",
         });
         setFurniture([]); // Establecer un array vacío en lugar de usar DEFAULT_FURNITURE
       }
     } catch (error) {
-      console.error("Error de conexión:", error);
+      console.error("Connection error:", error);
       toast({
-        title: "Error de conexión",
-        description: "No se pudo conectar al servidor",
+        title: "Connection error",
+        description: "Could not connect to the server.",
         variant: "destructive",
       });
       setFurniture([]); // Establecer un array vacío en lugar de usar DEFAULT_FURNITURE
@@ -205,8 +205,8 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
     } catch (error) {
       console.error("Error fetching inventory:", error)
       toast({
-        title: "Error",
-        description: "Could not load inventory",
+        title: "Error:",
+        description: "Could not load inventory.",
         variant: "destructive",
       })
     } finally {
@@ -236,7 +236,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
         console.error("Error fetching user data:", errorData);
         toast({
           title: "Error",
-          description: errorData.message || "No se pudo cargar el saldo de bayas",
+          description: errorData.message || "Could not load bells balance",
           variant: "destructive",
         });
       }
@@ -244,7 +244,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
       console.error("Error fetching user balance:", error);
       toast({
         title: "Connection error",
-        description: "No se pudo conectar al servidor",
+        description: "Could not connect to the server.",
         variant: "destructive",
       });
     }
@@ -289,7 +289,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
         fetchUserBalance();
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Error en la compra:", errorData);
+        console.error("Purchase error:", errorData);
         toast({
           title: "Error",
           description:
@@ -301,7 +301,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
       console.error("Connection error:", error);
       toast({
         title: "Connection error",
-        description: "No se pudo conectar al servidor",
+        description: "Could not connect to the server.",
         variant: "destructive",
       });
     } finally {
@@ -344,7 +344,7 @@ const [furniture, setFurniture] = useState<FurnitureItem[]>([])
       } catch (error) {
         toast({
           title: "Connection Error",
-          description: "Could not connect to the server",
+          description: "Could not connect to the server.",
           variant: "destructive",
         })
       } finally {
